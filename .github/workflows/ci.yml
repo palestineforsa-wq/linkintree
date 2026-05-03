@@ -14,7 +14,7 @@ jobs:
       # Real values come from secrets in deploy jobs (MYWEB-12).
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: anon-placeholder
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_placeholder
       SUPABASE_SERVICE_ROLE_KEY: service-placeholder
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
 
@@ -44,7 +44,7 @@ jobs:
     env:
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
       NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: anon-placeholder
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_placeholder
       SUPABASE_SERVICE_ROLE_KEY: service-placeholder
       DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
     steps:

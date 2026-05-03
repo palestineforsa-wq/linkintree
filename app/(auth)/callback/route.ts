@@ -1,8 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { createSupabaseServerClient } from "@/lib/auth/server";
 
-// TODO MYWEB-4: exchange Supabase OAuth code for session, redirect to dashboard.
-export async function GET() {
-  return NextResponse.redirect(
-    new URL("/dashboard", process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  );
+// OAuth + magic link callback. Exchanges the `code` for a session, then
+// redirects to `next` (or /dashboard).
+export async function GET(req: NextRequest) {
+  const { searchParams, origin } = new URL(req.url);
+  const code = searchParams.get("code");
+  const next = searchParams.get("next") ?? "/dashboard";
+
+  if (code) {
+    const supabase = await createSupabaseServerClient();
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    if (!error) {
+      return NextResponse.redirect(`${origin}${next}`);
+    }
+  }
+
+  return NextResponse.redirect(`${origin}/login?error=oauth_callback`);
 }

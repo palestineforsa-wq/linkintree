@@ -10,6 +10,7 @@ import type { BlockType } from "@/lib/blocks/schemas";
 import { Button } from "@/components/ui/button";
 import { Lock, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
 
 export function AddBlockMenu({
   isPro,
@@ -20,6 +21,7 @@ export function AddBlockMenu({
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [upgradeReason, setUpgradeReason] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
   const create = (type: BlockType) => {
@@ -27,6 +29,16 @@ export function AddBlockMenu({
     startTransition(async () => {
       const result = await createBlockAction(type);
       if (!result.ok) {
+        // Server-side gate hit. Surface the upgrade modal instead of a
+        // dead-end error; the message comes from the gate itself.
+        if (
+          result.error.includes("limit") ||
+          result.error.includes("Pro")
+        ) {
+          setUpgradeReason(result.error);
+          setOpen(false);
+          return;
+        }
         setError(result.error);
         return;
       }
@@ -54,11 +66,17 @@ export function AddBlockMenu({
                 <li key={type}>
                   <button
                     type="button"
-                    disabled={locked || pending}
-                    onClick={() => create(type)}
+                    disabled={pending}
+                    onClick={() =>
+                      locked
+                        ? setUpgradeReason(
+                            `${meta.label} blocks are a Pro feature.`,
+                          )
+                        : create(type)
+                    }
                     className={cn(
                       "flex w-full items-center gap-3 rounded-md px-2 py-2 text-left text-sm hover:bg-accent",
-                      locked && "cursor-not-allowed opacity-60",
+                      locked && "opacity-70",
                     )}
                   >
                     <span className="flex-1">
@@ -78,6 +96,11 @@ export function AddBlockMenu({
           )}
         </div>
       )}
+      <UpgradeModal
+        open={upgradeReason !== null}
+        reason={upgradeReason ?? undefined}
+        onClose={() => setUpgradeReason(null)}
+      />
     </div>
   );
 }

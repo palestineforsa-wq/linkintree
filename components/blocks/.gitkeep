@@ -1,0 +1,1 @@
+# One folder per block type. Each exports { schema, Editor, Renderer, defaultData }.

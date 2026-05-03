@@ -1,12 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
+import { unstable_after as after } from "next/server";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { blocks as blocksTable, profiles, subscriptions } from "@/lib/db/schema";
 import { BlockRenderer } from "@/components/blocks/Renderer";
 import { resolveProfileTheme, getThemeTokens } from "@/lib/themes/schema";
 import { tokensToStyle } from "@/lib/themes/presets";
+import {
+  extractRequestContext,
+  isBot,
+  logPageView,
+} from "@/lib/analytics/log";
 
 export const revalidate = 60;
 export const dynamicParams = true;
@@ -101,10 +108,18 @@ export default async function PublicProfilePage({
   const profile = await loadProfile(username);
   if (!profile) notFound();
 
-  const [activeBlocks, plan] = await Promise.all([
+  const [activeBlocks, plan, h] = await Promise.all([
     loadActiveBlocks(profile.id),
     loadPlan(profile.id),
+    headers(),
   ]);
+
+  // Page-view log: fire-and-forget after the response is sent. Bots are
+  // filtered before insert (spec §8). Logger never throws.
+  if (!isBot(h.get("user-agent"))) {
+    const ctx = extractRequestContext(h);
+    after(() => logPageView({ profileId: profile.id, ctx }));
+  }
 
   const theme = resolveProfileTheme(profile.theme);
   const tokens = getThemeTokens(theme);

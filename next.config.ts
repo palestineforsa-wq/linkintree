@@ -5,6 +5,7 @@ const config: NextConfig = {
   poweredByHeader: false,
   experimental: {
     typedRoutes: true,
+    after: true, // enables `unstable_after` in /[username] for fire-and-forget page-view logs
   },
   images: {
     remotePatterns: [

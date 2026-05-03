@@ -12,19 +12,8 @@ const config: NextConfig = {
       { protocol: "https", hostname: "*.supabase.in" },
     ],
   },
-  async headers() {
-    return [
-      {
-        source: "/:username((?!_next|api|favicon).*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, s-maxage=60, stale-while-revalidate=300",
-          },
-        ],
-      },
-    ];
-  },
+  // Public profile cache is per-route via `export const revalidate = 60`
+  // in app/[username]/page.tsx. Nginx s-maxage layer ships in MYWEB-12.
 };
 
 export default config;

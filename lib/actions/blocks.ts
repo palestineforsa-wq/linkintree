@@ -1,11 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { and, eq, max, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/lib/db/client";
 import { blocks } from "@/lib/db/schema";
 import { requireUser } from "@/lib/auth/server";
+import { revalidateOwnerSurfaces } from "./_revalidate";
 import {
   blockSchemas,
   BLOCK_TYPES,
@@ -65,7 +65,7 @@ export async function createBlockAction(
     })
     .returning({ id: blocks.id });
 
-  revalidatePath("/dashboard");
+  await revalidateOwnerSurfaces(user.id);
   return { ok: true, data: { id: inserted!.id } };
 }
 
@@ -105,7 +105,7 @@ export async function updateBlockAction({
     .set({ data: parsed.data, updatedAt: new Date() })
     .where(and(eq(blocks.id, id), eq(blocks.profileId, user.id)));
 
-  revalidatePath("/dashboard");
+  await revalidateOwnerSurfaces(user.id);
   return { ok: true };
 }
 
@@ -124,7 +124,7 @@ export async function deleteBlockAction(
     .delete(blocks)
     .where(and(eq(blocks.id, id), eq(blocks.profileId, user.id)));
 
-  revalidatePath("/dashboard");
+  await revalidateOwnerSurfaces(user.id);
   return { ok: true };
 }
 
@@ -156,7 +156,7 @@ export async function toggleBlockActiveAction({
     .set({ isActive, updatedAt: new Date() })
     .where(and(eq(blocks.id, id), eq(blocks.profileId, user.id)));
 
-  revalidatePath("/dashboard");
+  await revalidateOwnerSurfaces(user.id);
   return { ok: true };
 }
 
@@ -198,7 +198,7 @@ export async function reorderBlocksAction(
     })
     .where(eq(blocks.profileId, user.id));
 
-  revalidatePath("/dashboard");
+  await revalidateOwnerSurfaces(user.id);
   return { ok: true };
 }
 

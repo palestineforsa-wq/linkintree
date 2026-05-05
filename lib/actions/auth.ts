@@ -11,12 +11,13 @@ import {
   signupSchema,
   usernameSchema,
 } from "@/lib/auth/schemas";
+import { getSiteUrl } from "@/lib/site";
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T }
   | { ok: false; error: string; field?: string };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = getSiteUrl();
 
 // --- username availability ---------------------------------------------------
 

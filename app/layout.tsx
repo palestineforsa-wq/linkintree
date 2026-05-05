@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { getSiteUrl } from "@/lib/site";
 import "./globals.css";
 
 const inter = Inter({
@@ -15,9 +16,7 @@ export const metadata: Metadata = {
   },
   description:
     "Faster pages. Real analytics. Blocks beyond links. Free forever, with everything you need.",
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  ),
+  metadataBase: new URL(getSiteUrl()),
 };
 
 export default function RootLayout({

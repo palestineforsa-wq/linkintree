@@ -49,7 +49,7 @@ export function ForgotPasswordForm() {
           id="email"
           type="email"
           autoComplete="email"
-          className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+          className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-sm outline-none transition focus:border-white/25 focus:bg-white/[0.06] focus:ring-2 focus:ring-ring/40"
           {...register("email")}
         />
         {errors.email && (

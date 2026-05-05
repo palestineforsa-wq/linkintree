@@ -6,18 +6,28 @@
 export type ThemeTokens = {
   background: string; // hsl components, e.g. "0 0% 100%"
   foreground: string;
-  card: string; // link-block button bg
+  card: string;
   cardForeground: string;
   border: string;
   muted: string;
   mutedForeground: string;
-  accent: string; // for badges, hover
+  accent: string;
   accentForeground: string;
   ring: string;
-  radius: string; // CSS length, e.g. "0.5rem"
+  radius: string;
+  // Optional mesh palette for liquid-glass theme; falls back to the chrome
+  // mesh values when omitted.
+  mesh1?: string;
+  mesh2?: string;
+  mesh3?: string;
+  mesh4?: string;
+  // Visual mode hint — tells renderers to use frosted-glass surfaces when
+  // true. Currently set on the `glass` preset only.
+  glass?: boolean;
 };
 
 export const THEME_PRESET_NAMES = [
+  "glass",
   "daylight",
   "midnight",
   "linen",

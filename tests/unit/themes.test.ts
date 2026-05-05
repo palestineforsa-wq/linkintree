@@ -12,7 +12,7 @@ import {
 import { THEME_PRESET_NAMES } from "@/lib/themes/types";
 
 describe("theme presets", () => {
-  it("ships all four free-tier presets", () => {
+  it("ships all five free-tier presets", () => {
     expect(Object.keys(THEME_PRESETS).sort()).toEqual(
       [...THEME_PRESET_NAMES].sort(),
     );
@@ -37,8 +37,8 @@ describe("theme presets", () => {
     }
   });
 
-  it("default preset is daylight", () => {
-    expect(DEFAULT_THEME_PRESET).toBe("daylight");
+  it("default preset is glass (Liquid Glass)", () => {
+    expect(DEFAULT_THEME_PRESET).toBe("glass");
   });
 });
 
@@ -86,7 +86,7 @@ describe("getThemeTokens", () => {
 });
 
 describe("tokensToStyle", () => {
-  it("emits all CSS custom properties + background/color", () => {
+  it("emits all CSS custom properties + paints background for non-glass presets", () => {
     const tokens = THEME_PRESETS.daylight.tokens;
     const style = tokensToStyle(tokens) as Record<string, string>;
     expect(style["--background"]).toBe(tokens.background);
@@ -99,5 +99,13 @@ describe("tokensToStyle", () => {
     expect(style["--radius"]).toBe(tokens.radius);
     expect(style.backgroundColor).toContain(tokens.background);
     expect(style.color).toContain(tokens.foreground);
+  });
+
+  it("glass preset is transparent so the global mesh shows through", () => {
+    const tokens = THEME_PRESETS.glass.tokens;
+    const style = tokensToStyle(tokens) as Record<string, string>;
+    // No solid background — wrapper inherits from body, mesh paints behind.
+    expect(style.backgroundColor).toBeUndefined();
+    expect(style["--mesh-1"]).toBe(tokens.mesh1);
   });
 });

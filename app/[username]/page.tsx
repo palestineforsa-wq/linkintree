@@ -137,33 +137,36 @@ export default async function PublicProfilePage({
   };
 
   return (
-    <div style={tokensToStyle(tokens)} className="min-h-screen">
-      <main className="mx-auto max-w-md px-4 py-12">
+    <div style={tokensToStyle(tokens)} className="relative min-h-screen">
+      <main className="mx-auto max-w-md px-5 py-14">
         <header className="text-center">
-          {profile.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatarUrl}
-              alt=""
-              width={88}
-              height={88}
-              className="mx-auto h-22 w-22 rounded-full object-cover"
-              style={{ height: 88, width: 88 }}
-              loading="eager"
-              decoding="async"
-            />
-          ) : (
-            <div
+          <div className="relative mx-auto h-24 w-24">
+            <span
               aria-hidden
-              className="mx-auto rounded-full"
-              style={{
-                height: 88,
-                width: 88,
-                backgroundColor: `hsl(${tokens.muted})`,
-              }}
+              className="absolute -inset-2 -z-10 rounded-full bg-gradient-to-br from-fuchsia-500/40 via-violet-500/40 to-sky-500/40 blur-xl"
             />
-          )}
-          <h1 className="mt-3 flex items-center justify-center gap-1 text-xl font-semibold">
+            {profile.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={profile.avatarUrl}
+                alt=""
+                width={96}
+                height={96}
+                className="h-24 w-24 rounded-full object-cover ring-1 ring-white/10"
+                loading="eager"
+                decoding="async"
+              />
+            ) : (
+              <div
+                aria-hidden
+                className="h-24 w-24 rounded-full ring-1 ring-white/10"
+                style={{
+                  background: `linear-gradient(135deg, hsl(${tokens.accent}), hsl(${tokens.muted}))`,
+                }}
+              />
+            )}
+          </div>
+          <h1 className="mt-4 flex items-center justify-center gap-1.5 text-xl font-semibold tracking-tight">
             {displayName}
             {profile.isVerified ? (
               <span
@@ -180,19 +183,19 @@ export default async function PublicProfilePage({
             ) : null}
           </h1>
           <p
-            className="text-xs"
+            className="text-sm"
             style={{ color: `hsl(${tokens.mutedForeground})` }}
           >
             @{profile.username}
           </p>
           {profile.bio ? (
-            <p className="mx-auto mt-3 max-w-sm text-sm whitespace-pre-line">
+            <p className="mx-auto mt-4 max-w-sm whitespace-pre-line text-sm leading-relaxed">
               {profile.bio}
             </p>
           ) : null}
         </header>
 
-        <ul className="mt-8 flex flex-col gap-3">
+        <ul className="mt-10 flex flex-col gap-2.5">
           {activeBlocks.map((block) => (
             <li key={block.id}>
               <BlockRenderer block={block} />
@@ -202,12 +205,12 @@ export default async function PublicProfilePage({
 
         {showPoweredBy ? (
           <footer
-            className="mt-12 text-center text-xs"
+            className="mt-14 text-center text-xs"
             style={{ color: `hsl(${tokens.mutedForeground})` }}
           >
             <Link
               href="/"
-              className="hover:underline"
+              className="inline-flex items-center gap-1.5 rounded-full glass-button px-3 py-1.5 hover:bg-white/15"
               style={{ color: `hsl(${tokens.mutedForeground})` }}
             >
               Powered by Linkintree

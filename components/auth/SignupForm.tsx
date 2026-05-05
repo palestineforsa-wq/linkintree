@@ -99,14 +99,14 @@ export function SignupForm() {
         <label className="mb-1 block text-sm font-medium" htmlFor="username">
           Username
         </label>
-        <div className="flex items-center gap-2 rounded-md border bg-background pl-3 focus-within:ring-2 focus-within:ring-ring">
+        <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] pl-3.5 transition focus-within:border-white/25 focus-within:bg-white/[0.06] focus-within:ring-2 focus-within:ring-ring/40">
           <span className="text-sm text-muted-foreground">linkin.tree/</span>
           <input
             id="username"
             type="text"
             autoComplete="username"
             spellCheck={false}
-            className="h-10 flex-1 bg-transparent pr-3 text-sm outline-none"
+            className="h-11 flex-1 bg-transparent pr-3 text-sm outline-none"
             {...register("username")}
           />
           <AvailabilityBadge availability={availability} />
@@ -154,7 +154,7 @@ function Field({
       </label>
       <input
         id={props.name}
-        className="h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
+        className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 text-sm outline-none transition focus:border-white/25 focus:bg-white/[0.06] focus:ring-2 focus:ring-ring/40"
         {...props}
       />
       {error && <p className="mt-1 text-sm text-destructive">{error}</p>}

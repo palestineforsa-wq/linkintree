@@ -18,12 +18,12 @@ export function LinkRenderer({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="relative flex items-center gap-3 rounded-md border bg-background px-4 py-3 text-sm font-medium shadow-sm transition hover:bg-accent"
+      className="group relative flex items-center gap-3 rounded-2xl glass-button px-4 py-3.5 text-sm font-medium hover:bg-white/15"
     >
       {data.thumbnail_url ? (
         <span
           aria-hidden
-          className="h-9 w-9 shrink-0 overflow-hidden rounded-md bg-muted"
+          className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-muted"
           style={{
             backgroundImage: `url(${data.thumbnail_url})`,
             backgroundSize: "cover",
@@ -33,7 +33,7 @@ export function LinkRenderer({
       ) : null}
       <span className="flex-1 truncate text-center">{data.title}</span>
       {data.badge ? (
-        <span className="absolute right-2 top-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase text-primary-foreground">
+        <span className="absolute right-2.5 top-2.5 rounded-full bg-foreground/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-background">
           {BADGE_LABEL[data.badge]}
         </span>
       ) : null}

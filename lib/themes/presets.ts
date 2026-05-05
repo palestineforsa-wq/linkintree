@@ -1,6 +1,6 @@
 import type { ThemePreset, ThemeTokens } from "./types";
 
-// Free tier ships these four. Pro unlocks the full editor (MYWEB-9).
+// Free tier ships these five. Pro unlocks the full editor (MYWEB-9).
 // All values are HSL components without the `hsl()` wrapper, matching
 // app/globals.css. Designed for AAA contrast on link buttons.
 
@@ -8,6 +8,27 @@ export const THEME_PRESETS: Record<
   ThemePreset,
   { label: string; tokens: ThemeTokens }
 > = {
+  glass: {
+    label: "Liquid Glass",
+    tokens: {
+      background: "240 20% 5%",
+      foreground: "0 0% 98%",
+      card: "240 18% 9%",
+      cardForeground: "0 0% 98%",
+      border: "240 14% 20%",
+      muted: "240 12% 16%",
+      mutedForeground: "240 8% 70%",
+      accent: "250 90% 70%",
+      accentForeground: "0 0% 98%",
+      ring: "250 90% 70%",
+      radius: "1rem",
+      mesh1: "268 100% 60%",
+      mesh2: "196 100% 56%",
+      mesh3: "320 100% 60%",
+      mesh4: "220 100% 50%",
+      glass: true,
+    },
+  },
   daylight: {
     label: "Daylight",
     tokens: {
@@ -74,14 +95,13 @@ export const THEME_PRESETS: Record<
   },
 };
 
-export const DEFAULT_THEME_PRESET: ThemePreset = "daylight";
+export const DEFAULT_THEME_PRESET: ThemePreset = "glass";
 
-// Build the inline `style` object for a wrapper element. Setting these as
-// CSS custom properties at the wrapper level means every Tailwind class that
-// reads `var(--background)` / etc. inside this subtree gets the profile's
-// values without any class rewriting.
+// Build the inline `style` object for a wrapper element. CSS variables flow
+// through the renderer's bg-foo / text-foo classes; mesh tokens are read by
+// public-page wrappers to override the global mesh palette.
 export function tokensToStyle(tokens: ThemeTokens): React.CSSProperties {
-  return {
+  const base: Record<string, string> = {
     "--background": tokens.background,
     "--foreground": tokens.foreground,
     "--card": tokens.card,
@@ -93,7 +113,22 @@ export function tokensToStyle(tokens: ThemeTokens): React.CSSProperties {
     "--accent-foreground": tokens.accentForeground,
     "--ring": tokens.ring,
     "--radius": tokens.radius,
-    backgroundColor: `hsl(${tokens.background})`,
-    color: `hsl(${tokens.foreground})`,
-  } as React.CSSProperties;
+  };
+  if (tokens.mesh1) base["--mesh-1"] = tokens.mesh1;
+  if (tokens.mesh2) base["--mesh-2"] = tokens.mesh2;
+  if (tokens.mesh3) base["--mesh-3"] = tokens.mesh3;
+  if (tokens.mesh4) base["--mesh-4"] = tokens.mesh4;
+  // Glass theme floats on the global mesh background; keep the wrapper
+  // transparent so the mesh shows through. Other presets paint solid.
+  if (!tokens.glass) {
+    base.backgroundColor = `hsl(${tokens.background})`;
+    base.color = `hsl(${tokens.foreground})`;
+  } else {
+    base.color = `hsl(${tokens.foreground})`;
+  }
+  return base as React.CSSProperties;
+}
+
+export function isGlassPreset(preset: ThemePreset) {
+  return THEME_PRESETS[preset].tokens.glass === true;
 }

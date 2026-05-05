@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
-import { unstable_after as after } from "next/server";
+import { after } from "next/server";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db/client";
 import { blocks as blocksTable, profiles, subscriptions } from "@/lib/db/schema";

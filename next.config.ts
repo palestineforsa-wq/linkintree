@@ -6,7 +6,7 @@ const config: NextConfig = {
   poweredByHeader: false,
   experimental: {
     typedRoutes: true,
-    after: true, // enables `unstable_after` in /[username] for fire-and-forget page-view logs
+    // `after()` was promoted to stable in Next.js 15.1 — no flag needed.
   },
   images: {
     remotePatterns: [

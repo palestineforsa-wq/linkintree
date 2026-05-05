@@ -10,6 +10,8 @@ import { LinkRenderer } from "@/components/blocks/Link/Renderer";
 import { HeaderRenderer } from "@/components/blocks/Header/Renderer";
 import { SocialRowRenderer } from "@/components/blocks/SocialRow/Renderer";
 import { SpacerRenderer } from "@/components/blocks/Spacer/Renderer";
+import { EmbedRenderer } from "@/components/blocks/Embed/Renderer";
+import { ProductRenderer } from "@/components/blocks/Product/Renderer";
 import type { EditorBlock } from "./BlockList";
 
 // Mirrors components/blocks/Renderer but client-side and tolerant — used for
@@ -102,13 +104,36 @@ function PreviewBlock({ block }: { block: EditorBlock }) {
           <SpacerRenderer data={parsed.data as BlockData<"spacer">} />
         </li>
       );
-    default:
-      // Pro types — out of scope for MYWEB-5 preview; show a placeholder.
-      void fakeBlock; // appease unused for the future expansion path
+    case "embed":
       return (
-        <li className="rounded-md border border-dashed px-3 py-2 text-center text-xs text-muted-foreground">
-          {block.type} preview coming soon
+        <li>
+          <EmbedRenderer data={parsed.data as BlockData<"embed">} />
         </li>
       );
+    case "product":
+      return (
+        <li>
+          <ProductRenderer data={parsed.data as BlockData<"product">} />
+        </li>
+      );
+    case "email_capture":
+      return (
+        <li>
+          <div className="rounded-md border border-dashed bg-muted/40 p-3 text-center text-xs text-muted-foreground">
+            Email capture form
+          </div>
+        </li>
+      );
+    case "video":
+      return (
+        <li>
+          <div className="rounded-md border border-dashed bg-muted/40 p-3 text-center text-xs text-muted-foreground">
+            Video (preview after upload)
+          </div>
+        </li>
+      );
+    default:
+      void fakeBlock;
+      return null;
   }
 }

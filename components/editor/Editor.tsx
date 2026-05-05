@@ -4,7 +4,6 @@ import { useState } from "react";
 import { AddBlockMenu } from "./AddBlockMenu";
 import { BlockList, type EditorBlock } from "./BlockList";
 import { LivePreview } from "./LivePreview";
-import { useRouter } from "next/navigation";
 
 export function DashboardEditor({
   initialBlocks,
@@ -17,8 +16,10 @@ export function DashboardEditor({
   displayName: string | null;
   isPro: boolean;
 }) {
+  // Parent owns the canonical client-side block list. Children are controlled.
+  // Adds, edits, drags, deletes, toggles all flow through here so a single
+  // setState updates both the editor list AND the live preview.
   const [blocks, setBlocks] = useState(initialBlocks);
-  const router = useRouter();
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
@@ -26,16 +27,10 @@ export function DashboardEditor({
         <div className="mb-4">
           <AddBlockMenu
             isPro={isPro}
-            onAdded={() => {
-              // Server inserted a new row — re-fetch via the RSC.
-              router.refresh();
-            }}
+            onAdded={(block) => setBlocks((prev) => [...prev, block])}
           />
         </div>
-        <BlockList
-          initialBlocks={initialBlocks}
-          onBlocksChange={setBlocks}
-        />
+        <BlockList blocks={blocks} onChange={setBlocks} />
       </section>
       <aside>
         <LivePreview

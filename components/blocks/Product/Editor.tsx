@@ -44,7 +44,7 @@ export function ProductEditor({
       </FieldRow>
       <FieldRow
         label="Image URL (optional)"
-        error={errors.image_url?.message}
+        error={errors.image_url?.message as string | undefined}
       >
         <TextInput
           {...register("image_url")}

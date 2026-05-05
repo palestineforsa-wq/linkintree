@@ -28,9 +28,17 @@ const blockTypeSchema = z.enum(BLOCK_TYPES);
 // ----------------------------------------------------------------------------
 // create
 // ----------------------------------------------------------------------------
+export type CreatedBlock = {
+  id: string;
+  type: BlockType;
+  data: unknown;
+  isActive: boolean;
+  position: number;
+};
+
 export async function createBlockAction(
   type: BlockType,
-): Promise<BlockActionResult<{ id: string }>> {
+): Promise<BlockActionResult<CreatedBlock>> {
   const user = await requireUser();
 
   const typeResult = blockTypeSchema.safeParse(type);
@@ -54,19 +62,29 @@ export async function createBlockAction(
     .from(blocks)
     .where(eq(blocks.profileId, user.id));
 
+  const position = (maxPos ?? -1) + 1;
   const [inserted] = await db
     .insert(blocks)
     .values({
       profileId: user.id,
       type,
-      position: (maxPos ?? -1) + 1,
+      position,
       isActive: true,
       data: meta.defaultData,
     })
     .returning({ id: blocks.id });
 
   await revalidateOwnerSurfaces(user.id);
-  return { ok: true, data: { id: inserted!.id } };
+  return {
+    ok: true,
+    data: {
+      id: inserted!.id,
+      type,
+      data: meta.defaultData,
+      isActive: true,
+      position,
+    },
+  };
 }
 
 // ----------------------------------------------------------------------------

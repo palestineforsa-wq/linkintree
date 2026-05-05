@@ -1,5 +1,14 @@
 import { z } from "zod";
 
+// Form inputs that bind to optional fields default to "" in HTML; "" doesn't
+// satisfy enum/.url() checks. Coerce to undefined before downstream parsing
+// so editors don't silently fail validation when an optional field is empty.
+const optionalString = (inner: z.ZodTypeAny) =>
+  z.preprocess(
+    (v) => (typeof v === "string" && v.length === 0 ? undefined : v),
+    inner.optional(),
+  );
+
 export const BLOCK_TYPES = [
   "link",
   "header",
@@ -16,8 +25,8 @@ export type BlockType = (typeof BLOCK_TYPES)[number];
 const linkBlock = z.object({
   title: z.string().min(1).max(100),
   url: z.string().url(),
-  thumbnail_url: z.string().url().optional(),
-  badge: z.enum(["new", "popular", "limited"]).optional(),
+  thumbnail_url: optionalString(z.string().url()),
+  badge: optionalString(z.enum(["new", "popular", "limited"])),
 });
 
 const headerBlock = z.object({
@@ -60,20 +69,20 @@ const embedBlock = z.object({
 
 const videoBlock = z.object({
   storage_path: z.string().min(1),
-  poster_url: z.string().url().optional(),
+  poster_url: optionalString(z.string().url()),
 });
 
 const emailCaptureBlock = z.object({
   headline: z.string().min(1).max(100),
   cta: z.string().min(1).max(40).default("Subscribe"),
-  success_message: z.string().max(200).optional(),
+  success_message: optionalString(z.string().max(200)),
 });
 
 const productBlock = z.object({
   title: z.string().min(1).max(100),
   url: z.string().url(),
   price_text: z.string().min(1).max(40),
-  image_url: z.string().url().optional(),
+  image_url: optionalString(z.string().url()),
 });
 
 export const blockSchemas = {

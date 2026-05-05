@@ -11,13 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Lock, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UpgradeModal } from "@/components/upgrade/UpgradeModal";
+import type { EditorBlock } from "./BlockList";
 
 export function AddBlockMenu({
   isPro,
   onAdded,
 }: {
   isPro: boolean;
-  onAdded?: () => void;
+  onAdded?: (block: EditorBlock) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +44,7 @@ export function AddBlockMenu({
         return;
       }
       setOpen(false);
-      onAdded?.();
+      if (result.data) onAdded?.(result.data);
     });
   };
 

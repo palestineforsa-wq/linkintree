@@ -37,7 +37,7 @@ export function EmailCaptureEditor({
       </FieldRow>
       <FieldRow
         label="Success message (optional)"
-        error={errors.success_message?.message}
+        error={errors.success_message?.message as string | undefined}
       >
         <TextInput
           {...register("success_message")}

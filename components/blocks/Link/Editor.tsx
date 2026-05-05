@@ -41,14 +41,20 @@ export function LinkEditor({
           inputMode="url"
         />
       </FieldRow>
-      <FieldRow label="Thumbnail URL (optional)" error={errors.thumbnail_url?.message}>
+      <FieldRow
+        label="Thumbnail URL (optional)"
+        error={errors.thumbnail_url?.message as string | undefined}
+      >
         <TextInput
           {...register("thumbnail_url")}
           placeholder="https://…"
           inputMode="url"
         />
       </FieldRow>
-      <FieldRow label="Badge (optional)" error={errors.badge?.message}>
+      <FieldRow
+        label="Badge (optional)"
+        error={errors.badge?.message as string | undefined}
+      >
         <SelectInput {...register("badge")}>
           <option value="">None</option>
           <option value="new">New</option>

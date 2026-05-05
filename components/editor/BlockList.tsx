@@ -1,6 +1,6 @@
 "use client";
 
-import { useOptimistic, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -39,15 +39,17 @@ export type EditorBlock = {
   position: number;
 };
 
+// Controlled component — parent owns the canonical block list. Every mutation
+// optimistically updates the parent, then fires the server action; the parent
+// re-render shows the change immediately and the server confirms in the
+// background.
 export function BlockList({
-  initialBlocks,
-  onBlocksChange,
+  blocks,
+  onChange,
 }: {
-  initialBlocks: EditorBlock[];
-  onBlocksChange?: (blocks: EditorBlock[]) => void;
+  blocks: EditorBlock[];
+  onChange: (next: EditorBlock[]) => void;
 }) {
-  const [blocks, setBlocks] = useState(initialBlocks);
-  const [optimistic, setOptimistic] = useOptimistic(blocks);
   const [, startTransition] = useTransition();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -57,11 +59,6 @@ export function BlockList({
       coordinateGetter: sortableKeyboardCoordinates,
     }),
   );
-
-  const updateLocal = (next: EditorBlock[]) => {
-    setBlocks(next);
-    onBlocksChange?.(next);
-  };
 
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -74,46 +71,37 @@ export function BlockList({
       ...b,
       position: i,
     }));
-    updateLocal(next);
+    onChange(next);
 
     startTransition(async () => {
-      setOptimistic(next);
       await reorderBlocksAction({ orderedIds: next.map((b) => b.id) });
     });
   };
 
   const onUpdate = (id: string, data: unknown) => {
-    const next = blocks.map((b) => (b.id === id ? { ...b, data } : b));
-    updateLocal(next);
+    onChange(blocks.map((b) => (b.id === id ? { ...b, data } : b)));
     startTransition(async () => {
-      setOptimistic(next);
       await updateBlockAction({ id, data });
     });
   };
 
   const onToggle = (id: string, isActive: boolean) => {
-    const next = blocks.map((b) => (b.id === id ? { ...b, isActive } : b));
-    updateLocal(next);
+    const previous = blocks;
+    onChange(blocks.map((b) => (b.id === id ? { ...b, isActive } : b)));
     startTransition(async () => {
-      setOptimistic(next);
       const result = await toggleBlockActiveAction({ id, isActive });
-      if (!result.ok) {
-        // Revert
-        updateLocal(blocks);
-      }
+      if (!result.ok) onChange(previous); // revert
     });
   };
 
   const onDelete = (id: string) => {
-    const next = blocks.filter((b) => b.id !== id);
-    updateLocal(next);
+    onChange(blocks.filter((b) => b.id !== id));
     startTransition(async () => {
-      setOptimistic(next);
       await deleteBlockAction(id);
     });
   };
 
-  if (optimistic.length === 0) {
+  if (blocks.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center text-sm text-muted-foreground">
         No blocks yet. Add one above to get started.
@@ -128,11 +116,11 @@ export function BlockList({
       onDragEnd={onDragEnd}
     >
       <SortableContext
-        items={optimistic.map((b) => b.id)}
+        items={blocks.map((b) => b.id)}
         strategy={verticalListSortingStrategy}
       >
         <ul className="flex flex-col gap-2">
-          {optimistic.map((block) => (
+          {blocks.map((block) => (
             <SortableRow
               key={block.id}
               block={block}
@@ -206,9 +194,7 @@ function SortableRow({
           <div className="text-xs uppercase tracking-wider text-muted-foreground">
             {meta.label}
           </div>
-          <div className="text-sm font-medium">
-            {summarize(block)}
-          </div>
+          <div className="text-sm font-medium">{summarize(block)}</div>
         </div>
         <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <input

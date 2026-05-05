@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Vercel (production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Vercel CLI
+        run: pnpm add -g vercel@latest
+
+      - name: Pull Vercel environment (production)
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build with Vercel
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        id: deploy
+        run: |
+          DEPLOY_URL=$(vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$DEPLOY_URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed to $DEPLOY_URL"
+
+      - name: Production smoke
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.deploy.outputs.url }}
+        run: pnpm exec tsx scripts/smoke-public-profile.ts
+
+  lighthouse:
+    name: Lighthouse perf gate (≥95)
+    needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install Lighthouse CI
+        run: npm i -g @lhci/cli@0.14.x
+      - name: Run Lighthouse against production
+        env:
+          # Spec §9: block merges if perf score drops below 95 on /[username].
+          # We test the marketing root for now; when MYWEB-13 ships a known
+          # public username we'll add it to the URL list.
+          LHCI_BUILD_CONTEXT__EXTERNAL_BUILD_URL: https://${{ secrets.PRODUCTION_DOMAIN }}
+        run: |
+          lhci autorun \
+            --collect.url=https://${{ secrets.PRODUCTION_DOMAIN }} \
+            --collect.numberOfRuns=3 \
+            --assert.assertions.categories:performance=error \
+            --assert.assertions.categories:accessibility=warn
